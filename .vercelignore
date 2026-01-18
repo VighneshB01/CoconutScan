@@ -1,5 +1,5 @@
+# Ignore backend and unnecessary files
 Ml-Model-Backend-main/
-api/
 *.py
 *.keras
 __pycache__/
@@ -7,3 +7,4 @@ __pycache__/
 node_modules/
 .env
 *.log
+*.md
