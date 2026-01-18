@@ -4,7 +4,7 @@
   "description": "AI-powered coconut disease detection system",
   "main": "index.html",
   "scripts": {
-    "build": "echo 'Static site - no build needed'"
+    "build": "echo 'No build needed - static site'"
   },
   "keywords": ["ai", "machine-learning", "agriculture", "disease-detection"],
   "author": "Your Name",
