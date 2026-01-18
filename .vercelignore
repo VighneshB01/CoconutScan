@@ -1,0 +1,9 @@
+Ml-Model-Backend-main/
+api/
+*.py
+*.keras
+__pycache__/
+.git/
+node_modules/
+.env
+*.log
