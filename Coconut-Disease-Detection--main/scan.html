@@ -1,614 +1,1230 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coconut Disease Detection | CoconutGuard AI</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crop Scan | CoconutGuard AI</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
+
     <style>
-        :root {
-            --primary: #10b981;
-            --primary-dark: #065f46;
-            --primary-light: #ecfdf5;
-            --accent-blue: #3b82f6;
-            --accent-red: #ef4444;
-            --bg-body: #f3f5f7;
-            --bg-card: #ffffff;
-            --text-head: #1f2937;
-            --text-body: #6b7280;
-            --border-light: #e5e7eb;
-            --radius-xl: 20px;
-            --radius-lg: 12px;
-            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
-        }
+      :root {
+        /* 🎨 THEME */
+        --primary: #10b981;
+        --primary-dark: #065f46;
+        --primary-light: #ecfdf5;
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        --accent-blue: #3b82f6;
+        --accent-red: #ef4444;
 
+        --bg-body: #f3f5f7;
+        --bg-card: #ffffff;
+
+        --text-head: #1f2937;
+        --text-body: #6b7280;
+        --border-light: #e5e7eb;
+
+        /* Spacing & Radius */
+        --sidebar-width: 260px;
+        --header-height: 70px;
+        --radius-xl: 20px;
+        --radius-lg: 12px;
+
+        /* Shadows */
+        --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.02),
+          0 2px 4px -1px rgba(0, 0, 0, 0.02);
+        --shadow-float: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      body {
+        font-family: "Manrope", sans-serif;
+        background-color: var(--bg-body);
+        color: var(--text-head);
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      /* ------------------------------------------------
+                 1. SIDEBAR (Desktop Fixed, Mobile Drawer)
+              ------------------------------------------------ */
+      .sidebar {
+        width: var(--sidebar-width);
+        background: var(--bg-card);
+        display: flex;
+        flex-direction: column;
+        padding: 32px 24px;
+        border-right: 1px solid rgba(0, 0, 0, 0.03);
+        z-index: 100;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 48px;
+        color: var(--primary-dark);
+      }
+      .brand-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--primary-light);
+        color: var(--primary);
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        font-size: 24px;
+        flex-shrink: 0;
+      }
+      .brand-text {
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+      }
+
+      .nav-menu {
+        list-style: none;
+        flex: 1;
+        overflow-y: auto;
+      }
+      .nav-item {
+        margin-bottom: 8px;
+      }
+
+      .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 16px;
+        color: var(--text-body);
+        text-decoration: none;
+        border-radius: var(--radius-lg);
+        font-weight: 600;
+        font-size: 15px;
+        transition: all 0.2s ease;
+      }
+
+      .nav-link:hover {
+        background: var(--bg-body);
+        color: var(--text-head);
+      }
+      .nav-link.active {
+        background: var(--primary-light);
+        color: var(--primary-dark);
+      }
+      .nav-link.active i {
+        color: var(--primary);
+        font-weight: bold;
+      }
+
+      .user-profile {
+        background: var(--bg-body);
+        padding: 12px;
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        margin-top: auto;
+      }
+      .avatar {
+        width: 36px;
+        height: 36px;
+        background: #d1fae5;
+        color: var(--primary-dark);
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+
+      /* Mobile Overlay */
+      .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 90;
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.3s;
+      }
+      .sidebar-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      /* ------------------------------------------------
+                 2. MAIN CONTENT
+              ------------------------------------------------ */
+      .main-content {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 32px 40px;
+        position: relative;
+      }
+
+      /* Header */
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+      }
+
+      .mobile-toggle {
+        display: none;
+        background: none;
+        border: none;
+        font-size: 28px;
+        color: var(--text-head);
+        cursor: pointer;
+        padding: 0;
+        margin-right: 16px;
+      }
+
+      .header-left {
+        display: flex;
+        align-items: center;
+      }
+
+      .back-link {
+        text-decoration: none;
+        color: var(--text-body);
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: 0.2s;
+      }
+      .back-link:hover {
+        color: var(--primary);
+      }
+
+      .greeting h1 {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-head);
+        letter-spacing: -0.5px;
+        margin-top: 8px;
+      }
+      .greeting p {
+        color: var(--text-body);
+        font-size: 15px;
+        margin-top: 4px;
+        font-weight: 400;
+      }
+
+      .date-badge {
+        background: white;
+        padding: 8px 16px;
+        border-radius: 100px;
+        border: 1px solid var(--border-light);
+        color: var(--text-body);
+        font-size: 13px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: var(--shadow-card);
+      }
+
+      /* ------------------------------------------------
+                 3. SCAN GRID
+              ------------------------------------------------ */
+      .scan-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr; /* Desktop: 66% - 33% */
+        gap: 32px;
+        max-width: 1300px;
+        margin: 0 auto;
+      }
+
+      .left-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      .right-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .card {
+        background: var(--bg-card);
+        border-radius: var(--radius-xl);
+        padding: 24px;
+        box-shadow: var(--shadow-card);
+        border: 1px solid rgba(0, 0, 0, 0.02);
+      }
+
+      /* Sensor Tabs */
+      .section-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-body);
+        text-transform: uppercase;
+        margin-bottom: 12px;
+        letter-spacing: 0.8px;
+      }
+
+      .sensor-tabs {
+        background: #f8fafc;
+        padding: 6px;
+        border-radius: 16px;
+        display: flex;
+        gap: 6px;
+        margin-bottom: 24px;
+        border: 1px solid var(--border-light);
+      }
+      .sensor-tab {
+        flex: 1;
+        padding: 12px;
+        text-align: center;
+        cursor: pointer;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-body);
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .sensor-tab:hover {
+        background: rgba(255, 255, 255, 0.5);
+        color: var(--text-head);
+      }
+      .sensor-tab.active {
+        background: white;
+        color: var(--primary-dark);
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+      .sensor-tab.active i {
+        color: var(--primary);
+      }
+
+      /* Upload Zone */
+      .upload-zone {
+        border: 2px dashed var(--border-light);
+        border-radius: var(--radius-xl);
+        padding: 50px;
+        text-align: center;
+        background: #fafafa;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+      }
+      .upload-zone:hover {
+        border-color: var(--primary);
+        background: #f0fdf4;
+        transform: translateY(-1px);
+      }
+      .upload-zone:active {
+        transform: scale(0.98);
+        background: #dcfce7;
+      }
+
+      .icon-circle {
+        width: 64px;
+        height: 64px;
+        background: white;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 28px;
+        color: var(--primary);
+        box-shadow: var(--shadow-card);
+        margin: 0 auto 16px auto;
+      }
+      .upload-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-head);
+        margin-bottom: 6px;
+      }
+      .upload-desc {
+        font-size: 13px;
+        color: var(--text-body);
+        max-width: 280px;
+        margin: 0 auto;
+        line-height: 1.5;
+      }
+
+      /* Preview */
+      .preview-container {
+        display: none;
+        background: #f8fafc;
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        position: relative;
+        height: 400px;
+        width: 100%;
+        border: 1px solid var(--border-light);
+      }
+      .preview-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      .preview-actions {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 12px;
+        background: white;
+        padding: 6px;
+        border-radius: 100px;
+        box-shadow: var(--shadow-float);
+      }
+
+      /* Buttons */
+      .btn-analyze {
+        width: 100%;
+        padding: 16px;
+        border-radius: 14px;
+        background: var(--text-head);
+        color: white;
+        border: none;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        transition: 0.2s;
+        box-shadow: var(--shadow-card);
+        letter-spacing: 0.3px;
+      }
+      .btn-analyze:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background: #9ca3af;
+      }
+      .btn-analyze:not(:disabled):hover {
+        background: #111827;
+        transform: translateY(-1px);
+      }
+
+      .btn-icon-soft {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 1px solid var(--border-light);
+        background: white;
+        color: var(--text-body);
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        font-size: 18px;
+        transition: 0.2s;
+      }
+      .btn-icon-soft:hover {
+        background: #f3f5f7;
+        color: var(--text-head);
+      }
+
+      /* Right Panel */
+      .gps-card {
+        background: white;
+      }
+      .gps-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--primary);
+        background: var(--primary-light);
+        padding: 4px 10px;
+        border-radius: 20px;
+      }
+      .pulse-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--primary);
+        border-radius: 50%;
+        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+      }
+
+      .location-details {
+        margin-top: 16px;
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 16px;
+      }
+      .loc-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+      .loc-row:last-child {
+        margin-bottom: 0;
+      }
+      .loc-label {
+        color: var(--text-body);
+      }
+      .loc-val {
+        font-weight: 600;
+        color: var(--text-head);
+        text-align: right;
+      }
+
+      /* Result Card */
+      .result-card {
+        display: none;
+        background: white;
+        overflow: hidden;
+        animation: fadeIn 0.4s ease;
+        padding: 0;
+      }
+      .border-disease {
+        border-top: 5px solid #ef4444;
+      }
+      .border-healthy {
+        border-top: 5px solid #10b981;
+      }
+
+      .res-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+      .badge-disease {
+        background: #fef2f2;
+        color: #dc2626;
+      }
+      .badge-healthy {
+        background: #ecfdf5;
+        color: #059669;
+      }
+
+      .disease-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--text-head);
+        margin-bottom: 4px;
+      }
+      .res-desc {
+        font-size: 13px;
+        color: var(--text-body);
+        line-height: 1.6;
+      }
+
+      .meta-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-light);
+      }
+      .meta-item {
+        font-size: 11px;
+        color: var(--text-body);
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+      .meta-val {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-head);
+        margin-top: 2px;
+      }
+
+      .btn-view-report {
+        width: 100%;
+        padding: 12px;
+        margin-top: 20px;
+        border-radius: 10px;
+        background: var(--bg-body);
+        color: var(--text-head);
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 13px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-view-report:hover {
+        background: #e5e7eb;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ------------------------------------------------
+                 4. RESPONSIVE MEDIA QUERIES (FIXED FOR MOBILE)
+              ------------------------------------------------ */
+
+      /* Tablet & Mobile (<= 1024px) */
+      @media (max-width: 1024px) {
+        .scan-grid {
+          grid-template-columns: 1fr;
+        }
+        .right-panel {
+          flex-direction: row;
+        }
+        .gps-card,
+        .result-card {
+          flex: 1;
+        }
+      }
+
+      /* Mobile Phone (<= 768px) */
+      @media (max-width: 768px) {
+        /* Layout */
         body {
-            font-family: "Manrope", sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-head);
-            min-height: 100vh;
-            padding: 20px;
+          flex-direction: column;
+          height: auto;
+          overflow-y: visible;
+        }
+        .main-content {
+          padding: 20px;
+          overflow: visible;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+        /* Sidebar Drawer */
+        .sidebar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 280px;
+          transform: translateX(-100%);
+          box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar.active {
+          transform: translateX(0);
+        }
+        .sidebar-overlay.active {
+          opacity: 1;
+          pointer-events: auto;
         }
 
+        /* Header - Hiding Back/Date as requested */
         .header {
-            text-align: center;
-            margin-bottom: 40px;
+          align-items: flex-start;
+          margin-bottom: 24px;
+          position: relative;
+        }
+        .mobile-toggle {
+          display: block;
+          margin-top: 20px;
+        }
+        .back-link,
+        .date-badge {
+          display: none !important;
+        } /* Hidden on mobile */
+
+        /* Typography */
+        .greeting h1 {
+          font-size: 22px;
+          margin-top: 4px;
+        }
+        .greeting p {
+          font-size: 14px;
+          max-width: 250px;
         }
 
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--primary-dark);
-            margin-bottom: 10px;
+        /* Grid Stack */
+        .scan-grid {
+          gap: 24px;
+        }
+        .right-panel {
+          flex-direction: column;
         }
 
-        .header p {
-            font-size: 1.1rem;
-            color: var(--text-body);
+        /* Component Adjustments */
+        .sensor-tabs {
+          overflow-x: auto;
+          flex-wrap: nowrap;
+          -webkit-overflow-scrolling: touch;
         }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            align-items: start;
+        .sensor-tab {
+          white-space: nowrap;
+          flex-shrink: 0;
         }
-
-        .card {
-            background: var(--bg-card);
-            border-radius: var(--radius-xl);
-            padding: 30px;
-            box-shadow: var(--shadow-card);
-            border: 1px solid rgba(0, 0, 0, 0.02);
-        }
-
-        .upload-section h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: var(--text-head);
-        }
-
         .upload-zone {
-            border: 2px dashed var(--border-light);
-            border-radius: var(--radius-lg);
-            padding: 60px 20px;
-            text-align: center;
-            background: #fafafa;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
+          padding: 40px 20px;
         }
-
-        .upload-zone:hover {
-            border-color: var(--primary);
-            background: var(--primary-light);
-        }
-
-        .upload-zone.dragover {
-            border-color: var(--primary);
-            background: var(--primary-light);
-            transform: scale(1.02);
-        }
-
-        .upload-icon {
-            width: 60px;
-            height: 60px;
-            background: var(--primary-light);
-            color: var(--primary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            margin: 0 auto 20px;
-        }
-
-        .upload-text h3 {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-head);
-        }
-
-        .upload-text p {
-            color: var(--text-body);
-            font-size: 0.9rem;
-        }
-
         .preview-container {
-            display: none;
-            margin-bottom: 20px;
+          height: 300px;
+        }
+        .btn-analyze {
+          padding: 14px;
         }
 
-        .preview-image {
-            width: 100%;
-            max-height: 300px;
-            object-fit: contain;
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-light);
+        /* Result Card full width on mobile */
+        .result-card {
+          width: 100%;
         }
 
-        .preview-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
+        /* Inner padding thoda balanced */
+        .result-card > div {
+          padding: 20px;
         }
 
-        .btn {
-            padding: 12px 24px;
-            border-radius: var(--radius-lg);
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            justify-content: center;
+        /* View Full Report button FIX */
+        .btn-view-report {
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 14px;
+          padding: 14px;
+          border-radius: 12px;
+          margin-top: 16px;
         }
+      }
 
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            flex: 1;
+      @media (max-width: 768px) {
+        /* STOP equal-height cards on mobile */
+        .gps-card,
+        .result-card {
+          flex: unset !important;
+          height: auto !important;
         }
+      }
 
-        .btn-primary:hover:not(:disabled) {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
+      @media (max-width: 768px) {
+        .result-card {
+          overflow: visible !important;
         }
-
-        .btn-primary:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-        }
-
-        .btn-secondary {
-            background: var(--bg-body);
-            color: var(--text-body);
-            border: 1px solid var(--border-light);
-        }
-
-        .btn-secondary:hover {
-            background: #e5e7eb;
-        }
-
-        .result-section {
-            min-height: 400px;
-        }
-
-        .result-section h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: var(--text-head);
-        }
-
-        .result-placeholder {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-body);
-        }
-
-        .result-placeholder i {
-            font-size: 48px;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        .result-content {
-            display: none;
-        }
-
-        .result-status {
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-        }
-
-        .status-healthy {
-            background: var(--primary-light);
-            color: var(--primary-dark);
-        }
-
-        .status-diseased {
-            background: #fef2f2;
-            color: #dc2626;
-        }
-
-        .disease-name {
-            font-size: 1.8rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-            color: var(--text-head);
-        }
-
-        .confidence-score {
-            font-size: 1rem;
-            color: var(--text-body);
-            margin-bottom: 20px;
-        }
-
-        .result-details {
-            background: var(--bg-body);
-            padding: 20px;
-            border-radius: var(--radius-lg);
-            margin-top: 20px;
-        }
-
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-        }
-
-        .detail-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .detail-label {
-            color: var(--text-body);
-        }
-
-        .detail-value {
-            font-weight: 600;
-            color: var(--text-head);
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--border-light);
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .error-message {
-            background: #fef2f2;
-            color: #dc2626;
-            padding: 15px;
-            border-radius: var(--radius-lg);
-            border: 1px solid #fecaca;
-            margin-top: 15px;
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-                gap: 30px;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .card {
-                padding: 20px;
-            }
-        }
+      }
     </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🥥 CoconutGuard AI</h1>
-            <p>Advanced coconut disease detection using artificial intelligence</p>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon"><i class="ph-fill ph-plant"></i></div>
+        <span class="brand-text">CoconutGuard</span>
+      </div>
+
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="dashboard.html" class="nav-link">
+            <i class="ph ph-squares-four"></i> Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link active">
+            <i class="ph ph-scan"></i> New Analysis
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="reports.html" class="nav-link">
+            <i class="ph ph-chart-line-up"></i> Reports
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="library.html" class="nav-link">
+            <i class="ph ph-book-bookmark"></i> Library
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="settings.html" class="nav-link">
+            <i class="ph ph-gear"></i> Settings
+          </a>
+        </li>
+      </ul>
+
+      <div class="user-profile">
+        <div class="avatar">SJ</div>
+        <div style="flex: 1">
+          <div style="font-size: 14px; font-weight: 700">Sachi Jangid</div>
+          <div style="font-size: 12px; color: var(--text-body)">
+            Premium User
+          </div>
         </div>
+      </div>
+    </aside>
 
-        <div class="main-grid">
-            <!-- Upload Section -->
-            <div class="card upload-section">
-                <h2>Upload Image</h2>
-                
-                <div class="upload-zone" id="uploadZone">
-                    <div class="upload-icon">
-                        <i class="ph ph-camera-plus"></i>
-                    </div>
-                    <div class="upload-text">
-                        <h3>Drop image here or click to browse</h3>
-                        <p>Supports JPG, PNG files up to 10MB</p>
-                    </div>
-                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
-                </div>
+    <main class="main-content">
+      <header class="header">
+        <button class="mobile-toggle" onclick="toggleSidebar()">
+          <i class="ph ph-list"></i>
+        </button>
 
-                <div class="preview-container" id="previewContainer">
-                    <img id="previewImage" class="preview-image" alt="Preview">
-                    <div class="preview-actions">
-                        <button class="btn btn-primary" id="analyzeBtn" disabled>
-                            <i class="ph ph-scan"></i>
-                            Analyze Image
-                        </button>
-                        <button class="btn btn-secondary" id="resetBtn">
-                            <i class="ph ph-arrow-counter-clockwise"></i>
-                            Reset
-                        </button>
-                    </div>
-                </div>
+        <div>
+          <h1 class="greeting" style="margin-top: 12px">Crop Scan</h1>
+          <p>AI-powered disease detection & analysis.</p>
+        </div>
+      </header>
 
-                <div class="error-message" id="errorMessage"></div>
+      <div class="scan-grid">
+        <div class="left-panel">
+          <div>
+            <div class="section-label">1. Select Sensor</div>
+            <div class="sensor-tabs">
+              <div
+                class="sensor-tab active"
+                id="sensor-rgb"
+                onclick="selectSensor('rgb')"
+              >
+                <i class="ph-fill ph-camera"></i> RGB Camera
+              </div>
+              <div
+                class="sensor-tab"
+                id="sensor-thermal"
+                onclick="selectSensor('thermal')"
+              >
+                <i class="ph-fill ph-thermometer"></i> Thermal
+              </div>
+              <div
+                class="sensor-tab"
+                id="sensor-ndvi"
+                onclick="selectSensor('ndvi')"
+              >
+                <i class="ph-fill ph-plant"></i> NDVI
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="padding: 0; overflow: hidden">
+            <div
+              class="upload-zone"
+              id="uploadZone"
+              onclick="document.getElementById('imageSrc').click()"
+            >
+              <div class="icon-circle">
+                <i class="ph-fill ph-camera-plus"></i>
+              </div>
+              <div class="upload-title">Capture or Upload Image</div>
+              <p class="upload-desc">
+                Use a clear image of the leaf or stem. <br />Supports JPG, PNG,
+                HEIC.
+              </p>
+              <input
+                type="file"
+                id="imageSrc"
+                name="imageSrc"
+                hidden
+                accept="image"
+                onchange="handleFile(event)"
+              />
             </div>
 
-            <!-- Results Section -->
-            <div class="card result-section">
-                <h2>Analysis Results</h2>
-                
-                <div class="result-placeholder" id="resultPlaceholder">
-                    <i class="ph ph-chart-line-up"></i>
-                    <h3>No analysis yet</h3>
-                    <p>Upload an image and click analyze to see results</p>
-                </div>
-
-                <div class="loading" id="loadingIndicator" style="display: none;">
-                    <div class="spinner"></div>
-                    <h3>Analyzing image...</h3>
-                    <p>This may take a few seconds</p>
-                </div>
-
-                <div class="result-content" id="resultContent">
-                    <div class="result-status" id="resultStatus">Healthy</div>
-                    <div class="disease-name" id="diseaseName">No Disease Detected</div>
-                    <div class="confidence-score" id="confidenceScore">Confidence: 95.2%</div>
-                    
-                    <div class="result-details">
-                        <div class="detail-row">
-                            <span class="detail-label">Analysis Date:</span>
-                            <span class="detail-value" id="analysisDate">-</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Image Size:</span>
-                            <span class="detail-value" id="imageSize">-</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Processing Time:</span>
-                            <span class="detail-value" id="processingTime">-</span>
-                        </div>
-                    </div>
-                </div>
+            <div class="preview-container" id="previewContainer">
+              <img id="previewImg" class="preview-img" src="" alt="Scan" />
+              <div class="preview-actions">
+                <button
+                  class="btn-icon-soft"
+                  title="Retake"
+                  onclick="resetScan()"
+                >
+                  <i class="ph-bold ph-arrow-counter-clockwise"></i>
+                </button>
+                <button
+                  class="btn-icon-soft"
+                  title="Change"
+                  onclick="document.getElementById('imageSrc').click()"
+                >
+                  <i class="ph-bold ph-image"></i>
+                </button>
+              </div>
             </div>
+          </div>
+
+          <button
+            class="btn-analyze"
+            id="analyzeBtn"
+            onclick="runAnalysis()"
+            disabled
+          >
+            <i class="ph-bold ph-scan"></i> Analyze Crop Health
+          </button>
         </div>
-    </div>
+
+        <div class="right-panel">
+          <div class="card gps-card">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 12px;
+              "
+            >
+              <div class="section-label" style="margin: 0">
+                Location Context
+              </div>
+              <div class="gps-status" id="gpsStatus">
+                <div class="pulse-dot"></div>
+                <span id="gpsText">Locating...</span>
+              </div>
+            </div>
+
+            <div class="location-details">
+              <div class="loc-row">
+                <span class="loc-label">Region</span>
+                <span class="loc-val" id="locRegion">Detecting...</span>
+              </div>
+              <div class="loc-row">
+                <span class="loc-label">Coordinates</span>
+                <span class="loc-val" id="locCoords">--.--, --.--</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card result-card" id="resultCard">
+            <div style="padding: 24px">
+              <div id="resBadge" class="res-badge">--</div>
+
+              <div class="disease-title" id="resTitle">--</div>
+              <p class="res-desc" id="resDesc">--</p>
+
+              <div class="meta-grid">
+                <div class="meta-item">
+                  SCAN ID <span class="meta-val" id="resId">--</span>
+                </div>
+                <div class="meta-item">
+                  YIELD IMPACT <span class="meta-val" id="resImpact">--</span>
+                </div>
+              </div>
+
+              <button
+                class="btn-view-report"
+                id="viewReportBtn"
+                onclick="saveAndRedirect()"
+                disabled
+              >
+                View Full Report <i class="ph-bold ph-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <div
+      class="sidebar-overlay"
+      id="sidebarOverlay"
+      onclick="toggleSidebar()"
+    ></div>
 
     <script src="config.js"></script>
     <script>
-        // Configuration - Automatically detects environment
-        const API_URL = CONFIG.getApiUrl();
-        
-        // DOM Elements
-        const uploadZone = document.getElementById('uploadZone');
-        const imageInput = document.getElementById('imageInput');
-        const previewContainer = document.getElementById('previewContainer');
-        const previewImage = document.getElementById('previewImage');
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const errorMessage = document.getElementById('errorMessage');
-        const resultPlaceholder = document.getElementById('resultPlaceholder');
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const resultContent = document.getElementById('resultContent');
-        const resultStatus = document.getElementById('resultStatus');
-        const diseaseName = document.getElementById('diseaseName');
-        const confidenceScore = document.getElementById('confidenceScore');
-        const analysisDate = document.getElementById('analysisDate');
-        const imageSize = document.getElementById('imageSize');
-        const processingTime = document.getElementById('processingTime');
+      // --- STATE MANAGEMENT ---
+      let state = {
+        imageSrc: null, // Base64 image
+        lat: null,
+        lng: null,
+        region: "Unknown",
+        sensor: "RGB Camera",
+        scanId: null,
+        diseaseResult: null,
+        confidenceVal: 0,
+        formattedCoords: "--.--, --.--",
+      };
 
-        // State
-        let currentImageData = null;
-        let startTime = null;
+      // Configuration - Automatically detects environment
+      const API_URL = CONFIG.getApiUrl();
 
-        // Event Listeners
-        uploadZone.addEventListener('click', () => imageInput.click());
-        uploadZone.addEventListener('dragover', handleDragOver);
-        uploadZone.addEventListener('dragleave', handleDragLeave);
-        uploadZone.addEventListener('drop', handleDrop);
-        imageInput.addEventListener('change', handleFileSelect);
-        analyzeBtn.addEventListener('click', analyzeImage);
-        resetBtn.addEventListener('click', resetAnalysis);
+      // --- 1. INITIALIZATION ---
+      window.onload = function () {
+        initLocation();
+      };
 
-        // Drag and Drop Handlers
-        function handleDragOver(e) {
-            e.preventDefault();
-            uploadZone.classList.add('dragover');
+      // Helper to format coordinates (e.g. 12.92° N)
+      function formatCoord(value, type) {
+        if (!value) return "--";
+        const val = parseFloat(value);
+        const dir =
+          type === "lat" ? (val >= 0 ? "N" : "S") : val >= 0 ? "E" : "W";
+        return `${Math.abs(val).toFixed(2)}° ${dir}`;
+      }
+
+      function initLocation() {
+        const els = {
+          region: document.getElementById("locRegion"),
+          coords: document.getElementById("locCoords"),
+          statusText: document.getElementById("gpsText"),
+          statusDot: document.querySelector(".pulse-dot"),
+        };
+
+        // 1. Try fetching Dashboard Data from LocalStorage
+        const dbCity = localStorage.getItem("cg_city");
+        const dbState = localStorage.getItem("cg_state");
+        const dbLat = localStorage.getItem("cg_lat");
+        const dbLng = localStorage.getItem("cg_lng");
+
+        if (dbCity && dbState && dbLat && dbLng) {
+          state.region = `${dbCity}, ${dbState}`;
+          state.lat = dbLat;
+          state.lng = dbLng;
+          state.formattedCoords = `${formatCoord(dbLat, "lat")}, ${formatCoord(
+            dbLng,
+            "lng"
+          )}`;
+
+          els.region.innerText = state.region;
+          els.coords.innerText = state.formattedCoords;
+          els.statusText.innerText = "Synced";
+          if (els.statusDot) els.statusDot.style.background = "#3B82F6";
+          return;
         }
 
-        function handleDragLeave(e) {
-            e.preventDefault();
-            uploadZone.classList.remove('dragover');
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            uploadZone.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFile(files[0]);
+        // 2. Fallback: Run Live GPS
+        if ("geolocation" in navigator) {
+          els.statusText.innerText = "Locating...";
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              state.lat = pos.coords.latitude;
+              state.lng = pos.coords.longitude;
+              state.region = "Detected Location";
+              state.formattedCoords = `${formatCoord(
+                state.lat,
+                "lat"
+              )}, ${formatCoord(state.lng, "lng")}`;
+              els.coords.innerText = state.formattedCoords;
+              els.region.innerText = state.region;
+              els.statusText.innerText = "Live GPS";
+            },
+            (err) => {
+              console.warn("GPS Error", err);
+              els.statusText.innerText = "No Signal";
             }
+          );
+        } else {
+          els.statusText.innerText = "Unsupported";
+        }
+      }
+
+      // --- 2. SENSOR SELECTION ---
+      function selectSensor(type) {
+        document
+          .querySelectorAll(".sensor-tab")
+          .forEach((t) => t.classList.remove("active"));
+        document.getElementById("sensor-" + type).classList.add("active");
+
+        const map = { rgb: "RGB Camera", thermal: "Thermal", ndvi: "NDVI" };
+        state.sensor = map[type] || "RGB Camera";
+      }
+
+      // --- 3. FILE HANDLING ---
+      function handleFile(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // A. File Type Validation
+        if (!file.type.match("image.*")) {
+          alert("Invalid file type. Please upload a JPG or PNG image.");
+          e.target.value = ""; // Reset input
+          return;
         }
 
-        // File Selection Handler
-        function handleFileSelect(e) {
-            const file = e.target.files[0];
-            if (file) {
-                handleFile(file);
-            }
+        // B. Success - Load Preview
+        const reader = new FileReader();
+        reader.onload = function (evt) {
+          state.imageSrc = evt.target.result;
+          document.getElementById("previewImg").src = state.imageSrc;
+
+          // Toggle UI
+          document.getElementById("uploadZone").style.display = "none";
+          document.getElementById("previewContainer").style.display = "block";
+          document.getElementById("analyzeBtn").disabled = false;
+          document.getElementById("resultCard").style.display = "none";
+          document.getElementById("viewReportBtn").disabled = true;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function resetScan() {
+        document.getElementById("imageSrc").value = "";
+        document.getElementById("uploadZone").style.display = "block";
+        document.getElementById("previewContainer").style.display = "none";
+        document.getElementById("analyzeBtn").disabled = true;
+        document.getElementById("resultCard").style.display = "none";
+        state.imageSrc = null;
+      }
+
+      // ========================================================
+      // ✅ 4. DIRECT BACKEND ANALYSIS
+      // ========================================================
+      async function runAnalysis() {
+        // 1. Image check
+        if (!state.imageSrc) {
+          alert("Please upload an image first");
+          return;
         }
 
-        // File Processing
-        function handleFile(file) {
-            // Validate file type
-            if (!file.type.startsWith('image/')) {
-                showError('Please select a valid image file (JPG, PNG)');
-                return;
-            }
+        const btn = document.getElementById("analyzeBtn");
+        const originalText = btn.innerHTML;
 
-            // Validate file size (10MB limit)
-            if (file.size > 10 * 1024 * 1024) {
-                showError('File size must be less than 10MB');
-                return;
-            }
+        // UI loading state
+        btn.innerHTML =
+          '<i class="ph-bold ph-spinner ph-spin"></i> Analyzing...';
+        btn.disabled = true;
 
-            hideError();
+        // Check for long wait (Server waking up)
+        const waitTimer = setTimeout(() => {
+          btn.innerHTML =
+            '<i class="ph-bold ph-spinner ph-spin"></i> Waking up server...';
+        }, 5000);
 
-            // Read file as data URL
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                currentImageData = e.target.result;
-                showPreview(e.target.result);
-                
-                // Update image size info
-                const sizeKB = Math.round(file.size / 1024);
-                document.getElementById('imageSize').textContent = `${sizeKB} KB`;
-            };
-            reader.readAsDataURL(file);
+        try {
+          const response = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              imageSrc: state.imageSrc.split(",")[1], // Strip "data:image..." header
+            }),
+          });
+
+          clearTimeout(waitTimer);
+
+          if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`Server Error: ${response.status} - ${errText}`);
+          }
+
+          const result = await response.json();
+
+          // -------------------------------
+          // 4. UPDATE UI
+          // -------------------------------
+
+          // Disease title
+          document.getElementById("resTitle").innerText = result.disease;
+
+          // Confidence text
+          document.getElementById(
+            "resDesc"
+          ).innerText = `AI Confidence: ${result.confidence}%. Detected via ${state.sensor}.`;
+
+          // Decide status on frontend
+          const status = result.disease.toLowerCase().includes("healthy")
+            ? "Healthy"
+            : "Diseased";
+
+          // Badge
+          const badge = document.getElementById("resBadge");
+          badge.innerText = status.toUpperCase();
+
+          if (status === "Healthy") {
+            badge.className = "res-badge badge-healthy";
+            document.getElementById("resultCard").className =
+              "card result-card border-healthy";
+          } else {
+            badge.className = "res-badge badge-disease";
+            document.getElementById("resultCard").className =
+              "card result-card border-disease";
+          }
+
+          // Metadata
+          state.diseaseResult = result.disease;
+          state.confidenceVal = result.confidence;
+          state.scanId = "SCN-" + Math.floor(Math.random() * 10000);
+
+          document.getElementById("resId").innerText = state.scanId;
+          document.getElementById("resImpact").innerText =
+            status === "Healthy" ? "Low" : "High";
+
+          // Show result card
+          document.getElementById("resultCard").style.display = "block";
+          document.getElementById("viewReportBtn").disabled = false;
+
+          // Scroll for mobile
+          document
+            .getElementById("resultCard")
+            .scrollIntoView({ behavior: "smooth" });
+        } catch (err) {
+          console.error(err);
+          clearTimeout(waitTimer);
+
+          // Helpful Error Handling
+          if (err.message.includes("Failed to fetch")) {
+            alert(
+              "Connection Failed. \n\n1. Ensure your backend is running. \n2. Check your internet connection."
+            );
+          } else {
+            alert("Analysis Failed: " + err.message);
+          }
+        } finally {
+          // Reset button
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+      }
+
+      // --- 5. SAVE & REDIRECT ---
+      function saveAndRedirect() {
+        if (!state.scanId) return;
+
+        const scanReport = {
+          id: state.scanId,
+          disease: state.diseaseResult,
+          status: state.diseaseResult === "Healthy" ? "Healthy" : "Diseased",
+          confidence: state.confidenceVal,
+          image: state.imageSrc,
+          location: state.region,
+          coords: state.formattedCoords,
+          sensor: state.sensor,
+          timestamp: Date.now(),
+        };
+
+        const STORAGE_KEY = "cg_scan_history";
+        let history = [];
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) history = JSON.parse(raw);
+        } catch (e) {
+          console.error("Storage error", e);
+          history = [];
         }
 
-        // Show Image Preview
-        function showPreview(imageSrc) {
-            previewImage.src = imageSrc;
-            uploadZone.style.display = 'none';
-            previewContainer.style.display = 'block';
-            analyzeBtn.disabled = false;
-            
-            // Reset results
-            hideResults();
-        }
+        history.unshift(scanReport);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
 
-        // Analyze Image
-        async function analyzeImage() {
-            if (!currentImageData) {
-                showError('No image selected');
-                return;
-            }
+        window.location.href = "reports.html?latest=true";
+      }
 
-            startTime = Date.now();
-            showLoading();
-            hideError();
-
-            try {
-                // Extract base64 data (remove data:image/...;base64, prefix)
-                const base64Data = currentImageData.split(',')[1];
-                
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        imageSrc: base64Data
-                    })
-                });
-
-                const result = await response.json();
-
-                if (response.ok && result.status === 'success') {
-                    showResults(result);
-                } else {
-                    throw new Error(result.error || 'Analysis failed');
-                }
-
-            } catch (error) {
-                console.error('Analysis error:', error);
-                showError(`Analysis failed: ${error.message}`);
-                hideLoading();
-            }
-        }
-
-        // Show Loading State
-        function showLoading() {
-            resultPlaceholder.style.display = 'none';
-            resultContent.style.display = 'none';
-            loadingIndicator.style.display = 'block';
-        }
-
-        // Show Results
-        function showResults(result) {
-            const endTime = Date.now();
-            const processingTimeMs = endTime - startTime;
-            
-            // Update result data
-            const isHealthy = result.disease.toLowerCase().includes('healthy') || 
-                             result.confidence < 50; // Low confidence might indicate healthy
-            
-            resultStatus.textContent = isHealthy ? 'Healthy' : 'Disease Detected';
-            resultStatus.className = `result-status ${isHealthy ? 'status-healthy' : 'status-diseased'}`;
-            
-            diseaseName.textContent = result.disease;
-            confidenceScore.textContent = `Confidence: ${result.confidence}%`;
-            analysisDate.textContent = new Date().toLocaleString();
-            processingTime.textContent = `${processingTimeMs}ms`;
-
-            // Show results
-            loadingIndicator.style.display = 'none';
-            resultContent.style.display = 'block';
-        }
-
-        // Hide Results
-        function hideResults() {
-            resultPlaceholder.style.display = 'block';
-            resultContent.style.display = 'none';
-            loadingIndicator.style.display = 'none';
-        }
-
-        // Reset Analysis
-        function resetAnalysis() {
-            currentImageData = null;
-            imageInput.value = '';
-            previewContainer.style.display = 'none';
-            uploadZone.style.display = 'block';
-            analyzeBtn.disabled = true;
-            hideError();
-            hideResults();
-        }
-
-        // Error Handling
-        function showError(message) {
-            errorMessage.textContent = message;
-            errorMessage.style.display = 'block';
-        }
-
-        function hideError() {
-            errorMessage.style.display = 'none';
-        }
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Coconut Disease Detection App initialized');
-        });
+      function toggleSidebar() {
+        document.querySelector(".sidebar").classList.toggle("active");
+        document.getElementById("sidebarOverlay").classList.toggle("active");
+      }
     </script>
-</body>
+  </body>
 </html>
