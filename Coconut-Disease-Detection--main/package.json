@@ -4,9 +4,7 @@
   "description": "AI-powered coconut disease detection system",
   "main": "index.html",
   "scripts": {
-    "dev": "vercel dev",
-    "build": "echo 'Static site - no build needed'",
-    "start": "vercel dev"
+    "build": "echo 'Static site - no build needed'"
   },
   "keywords": ["ai", "machine-learning", "agriculture", "disease-detection"],
   "author": "Your Name",

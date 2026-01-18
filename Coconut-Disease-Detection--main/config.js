@@ -5,8 +5,8 @@ const CONFIG = {
     // Development API (local backend)
     DEVELOPMENT_API_URL: 'http://localhost:5000/api/predict',
     
-    // Production API - Railway deployment (easier than Heroku)
-    PRODUCTION_API_URL: 'https://your-app-name.up.railway.app/api/predict',
+    // Production API - Railway deployment
+    PRODUCTION_API_URL: 'https://coconutscan-production.up.railway.app/api/predict',
     
     // Automatically detect environment
     getApiUrl: function() {
