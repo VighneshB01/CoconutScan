@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Preview Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .upload-zone {
+            border: 2px dashed #ccc;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .upload-zone:hover {
+            border-color: #007bff;
+            background: #f8f9fa;
+        }
+        .preview-container {
+            display: none;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .preview-image {
+            max-width: 100%;
+            max-height: 400px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .result { margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🥥 Image Preview Test</h1>
+    
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+        <h3>📁 Click to Upload Image</h3>
+        <p>Or drag and drop an image here</p>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+    </div>
+
+    <div class="preview-container" id="previewContainer">
+        <h3>📸 Image Preview:</h3>
+        <img id="previewImage" class="preview-image" alt="Preview">
+        <br><br>
+        <button class="btn btn-primary" id="analyzeBtn">🔍 Analyze Image</button>
+        <button class="btn btn-secondary" onclick="resetPreview()">🔄 Upload New Image</button>
+    </div>
+
+    <div id="result" class="result" style="display: none;"></div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const uploadZone = document.getElementById('uploadZone');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const result = document.getElementById('result');
+
+        let currentImageData = null;
+
+        // File input change handler
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        });
+
+        // Drag and drop handlers
+        uploadZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#007bff';
+            uploadZone.style.background = '#f8f9fa';
+        });
+
+        uploadZone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#ccc';
+            uploadZone.style.background = '';
+        });
+
+        uploadZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#ccc';
+            uploadZone.style.background = '';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // Handle file processing
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentImageData = e.target.result;
+                showPreview(e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Show image preview
+        function showPreview(imageSrc) {
+            previewImage.src = imageSrc;
+            uploadZone.style.display = 'none';
+            previewContainer.style.display = 'block';
+            result.style.display = 'none';
+        }
+
+        // Reset preview
+        function resetPreview() {
+            currentImageData = null;
+            fileInput.value = '';
+            uploadZone.style.display = 'block';
+            previewContainer.style.display = 'none';
+            result.style.display = 'none';
+        }
+
+        // Analyze image (test with actual backend)
+        analyzeBtn.addEventListener('click', async function() {
+            if (!currentImageData) {
+                alert('No image selected');
+                return;
+            }
+
+            analyzeBtn.textContent = '🔄 Analyzing...';
+            analyzeBtn.disabled = true;
+
+            try {
+                const base64Data = currentImageData.split(',')[1];
+                
+                const response = await fetch('http://localhost:5000/api/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        imageSrc: base64Data
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.innerHTML = `
+                        <h3>✅ Analysis Complete!</h3>
+                        <p><strong>Disease:</strong> ${data.disease}</p>
+                        <p><strong>Confidence:</strong> ${data.confidence}%</p>
+                        <p><strong>Status:</strong> ${data.status}</p>
+                    `;
+                    result.style.display = 'block';
+                } else {
+                    throw new Error(data.error || 'Analysis failed');
+                }
+
+            } catch (error) {
+                result.innerHTML = `
+                    <h3>❌ Error</h3>
+                    <p>${error.message}</p>
+                `;
+                result.style.display = 'block';
+            } finally {
+                analyzeBtn.textContent = '🔍 Analyze Image';
+                analyzeBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

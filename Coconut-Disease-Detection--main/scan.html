@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coconut Disease Detection | CoconutGuard AI</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #065f46;
+            --primary-light: #ecfdf5;
+            --accent-blue: #3b82f6;
+            --accent-red: #ef4444;
+            --bg-body: #f3f5f7;
+            --bg-card: #ffffff;
+            --text-head: #1f2937;
+            --text-body: #6b7280;
+            --border-light: #e5e7eb;
+            --radius-xl: 20px;
+            --radius-lg: 12px;
+            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Manrope", sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-head);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: var(--text-body);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius-xl);
+            padding: 30px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid rgba(0, 0, 0, 0.02);
+        }
+
+        .upload-section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-head);
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 60px 20px;
+            text-align: center;
+            background: #fafafa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .upload-zone.dragover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin: 0 auto 20px;
+        }
+
+        .upload-text h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-head);
+        }
+
+        .upload-text p {
+            color: var(--text-body);
+            font-size: 0.9rem;
+        }
+
+        .preview-container {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .preview-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--bg-body);
+            color: var(--text-body);
+            border: 1px solid var(--border-light);
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .result-section {
+            min-height: 400px;
+        }
+
+        .result-section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-head);
+        }
+
+        .result-placeholder {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-body);
+        }
+
+        .result-placeholder i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .result-content {
+            display: none;
+        }
+
+        .result-status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .status-healthy {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+        .status-diseased {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .disease-name {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: var(--text-head);
+        }
+
+        .confidence-score {
+            font-size: 1rem;
+            color: var(--text-body);
+            margin-bottom: 20px;
+        }
+
+        .result-details {
+            background: var(--bg-body);
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            margin-top: 20px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .detail-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            color: var(--text-body);
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: var(--text-head);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-light);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: var(--radius-lg);
+            border: 1px solid #fecaca;
+            margin-top: 15px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🥥 CoconutGuard AI</h1>
+            <p>Advanced coconut disease detection using artificial intelligence</p>
+        </div>
+
+        <div class="main-grid">
+            <!-- Upload Section -->
+            <div class="card upload-section">
+                <h2>Upload Image</h2>
+                
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">
+                        <i class="ph ph-camera-plus"></i>
+                    </div>
+                    <div class="upload-text">
+                        <h3>Drop image here or click to browse</h3>
+                        <p>Supports JPG, PNG files up to 10MB</p>
+                    </div>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                </div>
+
+                <div class="preview-container" id="previewContainer">
+                    <img id="previewImage" class="preview-image" alt="Preview">
+                    <div class="preview-actions">
+                        <button class="btn btn-primary" id="analyzeBtn" disabled>
+                            <i class="ph ph-scan"></i>
+                            Analyze Image
+                        </button>
+                        <button class="btn btn-secondary" id="resetBtn">
+                            <i class="ph ph-arrow-counter-clockwise"></i>
+                            Reset
+                        </button>
+                    </div>
+                </div>
+
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="card result-section">
+                <h2>Analysis Results</h2>
+                
+                <div class="result-placeholder" id="resultPlaceholder">
+                    <i class="ph ph-chart-line-up"></i>
+                    <h3>No analysis yet</h3>
+                    <p>Upload an image and click analyze to see results</p>
+                </div>
+
+                <div class="loading" id="loadingIndicator" style="display: none;">
+                    <div class="spinner"></div>
+                    <h3>Analyzing image...</h3>
+                    <p>This may take a few seconds</p>
+                </div>
+
+                <div class="result-content" id="resultContent">
+                    <div class="result-status" id="resultStatus">Healthy</div>
+                    <div class="disease-name" id="diseaseName">No Disease Detected</div>
+                    <div class="confidence-score" id="confidenceScore">Confidence: 95.2%</div>
+                    
+                    <div class="result-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Analysis Date:</span>
+                            <span class="detail-value" id="analysisDate">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Image Size:</span>
+                            <span class="detail-value" id="imageSize">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Processing Time:</span>
+                            <span class="detail-value" id="processingTime">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        // Configuration - Automatically detects environment
+        const API_URL = CONFIG.getApiUrl();
+        
+        // DOM Elements
+        const uploadZone = document.getElementById('uploadZone');
+        const imageInput = document.getElementById('imageInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const resultPlaceholder = document.getElementById('resultPlaceholder');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const resultContent = document.getElementById('resultContent');
+        const resultStatus = document.getElementById('resultStatus');
+        const diseaseName = document.getElementById('diseaseName');
+        const confidenceScore = document.getElementById('confidenceScore');
+        const analysisDate = document.getElementById('analysisDate');
+        const imageSize = document.getElementById('imageSize');
+        const processingTime = document.getElementById('processingTime');
+
+        // State
+        let currentImageData = null;
+        let startTime = null;
+
+        // Event Listeners
+        uploadZone.addEventListener('click', () => imageInput.click());
+        uploadZone.addEventListener('dragover', handleDragOver);
+        uploadZone.addEventListener('dragleave', handleDragLeave);
+        uploadZone.addEventListener('drop', handleDrop);
+        imageInput.addEventListener('change', handleFileSelect);
+        analyzeBtn.addEventListener('click', analyzeImage);
+        resetBtn.addEventListener('click', resetAnalysis);
+
+        // Drag and Drop Handlers
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        }
+
+        // File Selection Handler
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        // File Processing
+        function handleFile(file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                showError('Please select a valid image file (JPG, PNG)');
+                return;
+            }
+
+            // Validate file size (10MB limit)
+            if (file.size > 10 * 1024 * 1024) {
+                showError('File size must be less than 10MB');
+                return;
+            }
+
+            hideError();
+
+            // Read file as data URL
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentImageData = e.target.result;
+                showPreview(e.target.result);
+                
+                // Update image size info
+                const sizeKB = Math.round(file.size / 1024);
+                document.getElementById('imageSize').textContent = `${sizeKB} KB`;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Show Image Preview
+        function showPreview(imageSrc) {
+            previewImage.src = imageSrc;
+            uploadZone.style.display = 'none';
+            previewContainer.style.display = 'block';
+            analyzeBtn.disabled = false;
+            
+            // Reset results
+            hideResults();
+        }
+
+        // Analyze Image
+        async function analyzeImage() {
+            if (!currentImageData) {
+                showError('No image selected');
+                return;
+            }
+
+            startTime = Date.now();
+            showLoading();
+            hideError();
+
+            try {
+                // Extract base64 data (remove data:image/...;base64, prefix)
+                const base64Data = currentImageData.split(',')[1];
+                
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        imageSrc: base64Data
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.status === 'success') {
+                    showResults(result);
+                } else {
+                    throw new Error(result.error || 'Analysis failed');
+                }
+
+            } catch (error) {
+                console.error('Analysis error:', error);
+                showError(`Analysis failed: ${error.message}`);
+                hideLoading();
+            }
+        }
+
+        // Show Loading State
+        function showLoading() {
+            resultPlaceholder.style.display = 'none';
+            resultContent.style.display = 'none';
+            loadingIndicator.style.display = 'block';
+        }
+
+        // Show Results
+        function showResults(result) {
+            const endTime = Date.now();
+            const processingTimeMs = endTime - startTime;
+            
+            // Update result data
+            const isHealthy = result.disease.toLowerCase().includes('healthy') || 
+                             result.confidence < 50; // Low confidence might indicate healthy
+            
+            resultStatus.textContent = isHealthy ? 'Healthy' : 'Disease Detected';
+            resultStatus.className = `result-status ${isHealthy ? 'status-healthy' : 'status-diseased'}`;
+            
+            diseaseName.textContent = result.disease;
+            confidenceScore.textContent = `Confidence: ${result.confidence}%`;
+            analysisDate.textContent = new Date().toLocaleString();
+            processingTime.textContent = `${processingTimeMs}ms`;
+
+            // Show results
+            loadingIndicator.style.display = 'none';
+            resultContent.style.display = 'block';
+        }
+
+        // Hide Results
+        function hideResults() {
+            resultPlaceholder.style.display = 'block';
+            resultContent.style.display = 'none';
+            loadingIndicator.style.display = 'none';
+        }
+
+        // Reset Analysis
+        function resetAnalysis() {
+            currentImageData = null;
+            imageInput.value = '';
+            previewContainer.style.display = 'none';
+            uploadZone.style.display = 'block';
+            analyzeBtn.disabled = true;
+            hideError();
+            hideResults();
+        }
+
+        // Error Handling
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Coconut Disease Detection App initialized');
+        });
+    </script>
+</body>
+</html>

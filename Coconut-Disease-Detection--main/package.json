@@ -1,0 +1,14 @@
+{
+  "name": "coconutguard-ai",
+  "version": "1.0.0",
+  "description": "AI-powered coconut disease detection system",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Static site - no build needed'",
+    "start": "vercel dev"
+  },
+  "keywords": ["ai", "machine-learning", "agriculture", "disease-detection"],
+  "author": "Your Name",
+  "license": "MIT"
+}
