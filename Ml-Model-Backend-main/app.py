@@ -1,7 +1,6 @@
 import os
 import sys
 import traceback
-from datetime import datetime
 
 # Force CPU only for better compatibility
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
@@ -18,21 +17,11 @@ app = Flask(__name__)
 
 # Enhanced CORS configuration for production
 CORS(app, 
-     origins=["*"],  # Allow all origins for now
+     origins=["*"],  # Allow all origins
      methods=["GET", "POST", "OPTIONS"],
-     allow_headers=["Content-Type", "Authorization", "Access-Control-Allow-Origin"],
-     supports_credentials=False,
-     expose_headers=["Content-Type", "Authorization"]
+     allow_headers=["Content-Type", "Authorization"],
+     supports_credentials=False
 )
-
-# Additional CORS headers for Railway compatibility
-@app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    response.headers.add('Access-Control-Allow-Credentials', 'false')
-    return response
 
 # Global variables
 model = None
@@ -98,33 +87,12 @@ def health_check():
     model_status = "loaded" if model is not None else "not loaded"
     return f"Coconut Disease Detection API - Model: {model_status}"
 
-@app.route('/test-cors', methods=['GET', 'OPTIONS'])
-def test_cors():
-    """Simple CORS test endpoint"""
-    if request.method == 'OPTIONS':
-        response = jsonify({'status': 'preflight ok'})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,OPTIONS')
-        return response
-    
-    return jsonify({
-        'message': 'CORS test successful',
-        'timestamp': str(datetime.now()),
-        'status': 'ok'
-    })
-
 @app.route('/api/predict', methods=['POST', 'OPTIONS'])
 def predict():
     """Main prediction endpoint"""
     # Handle preflight OPTIONS request
     if request.method == 'OPTIONS':
-        response = jsonify({'status': 'ok'})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-        response.headers.add('Access-Control-Allow-Methods', 'POST,OPTIONS')
-        response.headers.add('Access-Control-Max-Age', '3600')
-        return response
+        return '', 200
     
     try:
         # Check if model is loaded
