@@ -1171,17 +1171,27 @@
             .getElementById("resultCard")
             .scrollIntoView({ behavior: "smooth" });
         } catch (err) {
-          console.error(err);
+          console.error("Analysis Error:", err);
           clearTimeout(waitTimer);
 
-          // Helpful Error Handling
-          if (err.message.includes("Failed to fetch")) {
-            alert(
-              "Connection Failed. \n\n1. Ensure your backend is running. \n2. Check your internet connection."
-            );
+          // Enhanced Error Handling
+          let errorMessage = "Analysis Failed";
+          
+          if (err.message.includes("Failed to fetch") || err.message.includes("NetworkError")) {
+            errorMessage = "Connection Failed - CORS Issue\n\n" +
+                          "This usually happens when:\n" +
+                          "1. The backend server is starting up (wait 30 seconds)\n" +
+                          "2. Network connectivity issues\n" +
+                          "3. CORS configuration problems\n\n" +
+                          "Backend URL: " + API_URL;
+          } else if (err.message.includes("500")) {
+            errorMessage = "Server Error - Model Loading Issue\n\n" +
+                          "The AI model may be loading. Please wait 30 seconds and try again.";
           } else {
-            alert("Analysis Failed: " + err.message);
+            errorMessage = "Analysis Failed: " + err.message;
           }
+          
+          alert(errorMessage);
         } finally {
           // Reset button
           btn.innerHTML = originalText;
