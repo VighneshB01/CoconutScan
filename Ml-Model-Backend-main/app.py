@@ -85,7 +85,7 @@ def predict_disease(image_data):
 def health_check():
     """Health check endpoint"""
     model_status = "loaded" if model is not None else "not loaded"
-    return f"Coconut Disease Detection API - Model: {model_status}"
+    return f"Coconut Disease Detection API v2.1 - Model: {model_status}"
 
 @app.route('/api/predict', methods=['POST', 'OPTIONS'])
 def predict():
